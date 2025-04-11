@@ -1,12 +1,55 @@
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:image_picker/image_picker.dart';
+import '../../../core/app_color.dart';
 import '../../auth_section/controller/auth_controller.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends StatefulWidget {
+  @override
+  _ProfileScreenState createState() => _ProfileScreenState();
+}
+
+class _ProfileScreenState extends State<ProfileScreen> {
+  File? _profileImage;
+  final ImagePicker _picker = ImagePicker();
+
+  @override
+  void initState() {
+    super.initState();
+    _loadProfileImage();
+  }
+
+  Future<void> _loadProfileImage() async {
+    final prefs = await SharedPreferences.getInstance();
+    final imagePath = prefs.getString('profile_image_path');
+    if (imagePath != null) {
+      setState(() {
+        _profileImage = File(imagePath);
+      });
+    }
+  }
+
+  Future<void> _saveProfileImage(String path) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('profile_image_path', path);
+  }
+
+  Future<void> _pickImage() async {
+    final pickedFile = await _picker.pickImage(source: ImageSource.gallery);
+    if (pickedFile != null) {
+      setState(() {
+        _profileImage = File(pickedFile.path);
+      });
+      await _saveProfileImage(pickedFile.path);
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.grey[100],
+      backgroundColor: AppColor.greyColor.withOpacity(0.05),
       body: GetX<AuthController>(
         builder: (controller) {
           if (controller.firebaseUser.value == null) {
@@ -16,54 +59,49 @@ class ProfileScreen extends StatelessWidget {
           return SingleChildScrollView(
             child: Column(
               children: [
-                // Profile Header with Cover Photo
+                // Profile Header
                 Container(
                   height: 220,
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      colors: [Colors.blue[700]!, Colors.blue[400]!],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
+                    color: Colors.teal,
                   ),
                   child: Stack(
                     children: [
-                      Positioned(
-                        top: 40,
-                        right: 20,
-                        child: IconButton(
-                          icon: Icon(Icons.edit, color: Colors.white),
-                          onPressed: () {
-                            // Add edit profile functionality
-                          },
-                        ),
-                      ),
                       Center(
                         child: Column(
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
-                            // Profile Avatar
-                            Container(
-                              width: 100,
-                              height: 100,
-                              decoration: BoxDecoration(
-                                shape: BoxShape.circle,
-                                color: Colors.white,
-                                border: Border.all(
+                            // Profile Avatar with image picker
+                            GestureDetector(
+                              onTap: _pickImage,
+                              child: Container(
+                                width: 100,
+                                height: 100,
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
                                   color: Colors.white,
-                                  width: 3,
+                                  border: Border.all(
+                                    color: Colors.white,
+                                    width: 3,
+                                  ),
                                 ),
-                              ),
-                              child: ClipOval(
-                                child: Icon(
-                                  Icons.person,
-                                  size: 60,
-                                  color: Colors.blue[700],
+                                child: ClipOval(
+                                  child: _profileImage != null
+                                      ? Image.file(
+                                    _profileImage!,
+                                    fit: BoxFit.cover,
+                                    width: 100,
+                                    height: 100,
+                                  )
+                                      : Icon(
+                                    Icons.person,
+                                    size: 60,
+                                    color: AppColor.purpleColor,
+                                  ),
                                 ),
                               ),
                             ),
                             SizedBox(height: 10),
-                            // User Name
                             Text(
                               controller.userData["name"] ?? "User",
                               style: TextStyle(
@@ -73,7 +111,6 @@ class ProfileScreen extends StatelessWidget {
                               ),
                             ),
                             SizedBox(height: 5),
-                            // User Email
                             Text(
                               controller.firebaseUser.value?.email ?? "",
                               style: TextStyle(
@@ -84,56 +121,56 @@ class ProfileScreen extends StatelessWidget {
                           ],
                         ),
                       ),
+                      Positioned(
+                        top: 40,
+                        right: 20,
+                        child: IconButton(
+                          icon: Icon(Icons.camera_alt, color: Colors.white),
+                          onPressed: _pickImage,
+                        ),
+                      ),
                     ],
                   ),
                 ),
 
-                // Profile Details Card
+                // Rest of your existing widgets...
                 Padding(
                   padding: const EdgeInsets.all(16.0),
-                  child: Card(
-                    elevation: 4,
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(15),
-                    ),
-                    child: Padding(
-                      padding: const EdgeInsets.all(16.0),
-                      child: Column(
-                        children: [
-                          // Personal Information Section
-                          _buildProfileItem(
-                            icon: Icons.cake,
-                            title: "Birthday",
-                            value: controller.userData["birthday"] ?? "Not provided",
-                          ),
-                          Divider(height: 30, thickness: 0.5),
-                          _buildProfileItem(
-                            icon: Icons.person_outline,
-                            title: "Gender",
-                            value: controller.userData["gender"] ?? "Not provided",
-                          ),
-                          Divider(height: 30, thickness: 0.5),
-                          _buildProfileItem(
-                            icon: Icons.email_outlined,
-                            title: "Email",
-                            value: controller.firebaseUser.value?.email ?? "",
-                          ),
-                        ],
+                  child: Column(
+                    children: [
+                      _buildProfileTile(
+                        context,
+                        icon: Icons.cake,
+                        title: "Birthday",
+                        value: controller.userData["birthday"] ?? "Not provided",
                       ),
-                    ),
+                      Divider(height: 1),
+                      _buildProfileTile(
+                        context,
+                        icon: Icons.person_outline,
+                        title: "Gender",
+                        value: controller.userData["gender"] ?? "Not provided",
+                      ),
+                      Divider(height: 1),
+                      _buildProfileTile(
+                        context,
+                        icon: Icons.email_outlined,
+                        title: "Email",
+                        value: controller.firebaseUser.value?.email ?? "",
+                      ),
+                    ],
                   ),
                 ),
 
-                // Logout Button
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 16.0),
                   child: SizedBox(
                     width: double.infinity,
-                    child: ElevatedButton(
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: Colors.red[400],
+                    child: TextButton(
+                      style: TextButton.styleFrom(
+                        backgroundColor: AppColor.purpleColor.withOpacity(0.1),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(10),
+                          borderRadius: BorderRadius.circular(8),
                         ),
                         padding: EdgeInsets.symmetric(vertical: 16),
                       ),
@@ -143,24 +180,17 @@ class ProfileScreen extends StatelessWidget {
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.white,
+                          color: AppColor.purpleColor,
                         ),
                       ),
                     ),
                   ),
                 ),
-
-                // App Version Info
-                Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Text(
-                    "App Version 1.0.0",
-                    style: TextStyle(
-                      color: Colors.grey[600],
-                      fontSize: 12,
-                    ),
-                  ),
+                SizedBox(
+                  height: 20,
                 ),
+
+                Text("App version 1.0.1")
               ],
             ),
           );
@@ -169,39 +199,25 @@ class ProfileScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildProfileItem({
-    required IconData icon,
-    required String title,
-    required String value,
-  }) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, color: Colors.blue[700], size: 24),
-        SizedBox(width: 16),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(
-                title,
-                style: TextStyle(
-                  color: Colors.grey[600],
-                  fontSize: 14,
-                ),
-              ),
-              SizedBox(height: 4),
-              Text(
-                value,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-            ],
-          ),
+  Widget _buildProfileTile(
+      BuildContext context, {
+        required IconData icon,
+        required String title,
+        required String value,
+      }) {
+    return ListTile(
+      contentPadding: EdgeInsets.symmetric(vertical: 8),
+      leading: Icon(icon, color: AppColor.purpleColor),
+      title: Text(
+        title,
+        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+          color: AppColor.greyColor,
         ),
-      ],
+      ),
+      subtitle: Text(
+        value,
+        style: Theme.of(context).textTheme.bodyLarge,
+      ),
     );
   }
 }

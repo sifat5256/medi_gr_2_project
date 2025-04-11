@@ -1,8 +1,11 @@
+import 'dart:io';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:get/get.dart';
 import 'package:medi_gr_2_project/app/features/Screen/login_screen.dart';
 import 'package:medi_gr_2_project/app/features/botttom_nav_bar/screen/home_screen.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../botttom_nav_bar/bottom_nav_bar.dart';
 import '../../botttom_nav_bar/screen/profile_screen.dart';
@@ -16,6 +19,26 @@ class AuthController extends GetxController {
 
   Rx<User?> firebaseUser = Rx<User?>(null);
   RxMap<String, dynamic> userData = RxMap<String, dynamic>({});
+  // Add to AuthController
+  final Rx<File?> profileImage = Rx<File?>(null);
+
+  @override
+  void onInit() {
+    super.onInit();
+    ever(firebaseUser, (_) => fetchProfileImage());
+  }
+
+  Future<void> fetchProfileImage() async {
+    if (firebaseUser.value != null) {
+      final prefs = await SharedPreferences.getInstance();
+      final imagePath = prefs.getString('profile_image_path');
+      if (imagePath != null && File(imagePath).existsSync()) {
+        profileImage.value = File(imagePath);
+      } else {
+        profileImage.value = null;
+      }
+    }
+  }
 
   @override
   void onReady() {
