@@ -14,7 +14,7 @@ class MainScreen extends StatelessWidget {
     HomeScreen(),
     ProfileScreen(),
     DocumentScreen(),
-    DoctorAppointmentScreen(),
+    AppointmentScreen(),
   ];
 
   @override

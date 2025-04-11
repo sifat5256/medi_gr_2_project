@@ -51,6 +51,16 @@ dependencies:
   animate_do: ^4.2.0
   flutter_launcher_icons: ^0.13.1
   flutter_native_splash: ^2.4.6
+  objectbox: ^2.0.0
+  objectbox_flutter_libs: any
+  build_runner: any
+  objectbox_generator: any
+  image_picker: ^1.0.4
+  file_picker:
+  intl: ^0.19.0
+  open_file:
+
+  path_provider: ^2.1.5
 
 dev_dependencies:
   flutter_test:
@@ -62,6 +72,8 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+  build_runner: ^2.4.6
+  objectbox_generator: any
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
