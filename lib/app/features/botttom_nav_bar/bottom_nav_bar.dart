@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:medi_gr_2_project/app/features/botttom_nav_bar/screen/add_medicine.dart';
 
 import 'controller/nav_controller.dart';
 import 'screen/doctor_appoint_screen.dart';
@@ -40,9 +41,7 @@ class MainScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: () {
-          Get.snackbar('FAB', 'Floating Action Button Pressed');
-        },
+        onPressed: () => Get.to(() => AddEditMedicineScreen()),
         backgroundColor: Colors.teal,
         child: Icon(Icons.add, size: 28),
         elevation: 4,

@@ -2,11 +2,13 @@ import 'package:animate_do/animate_do.dart';
 
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:lottie/lottie.dart';
 import 'package:medi_gr_2_project/app/features/Screen/signup_screen.dart';
 
 
 import '../../core/app_color.dart';
+import '../auth_section/controller/auth_controller.dart';
 import '../botttom_nav_bar/bottom_nav_bar.dart';
 import '../icons.dart';
 import 'home_page.dart';
@@ -36,6 +38,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   bool _obscureText = true;
+  AuthController controller =Get.put(AuthController());
 
   @override
   void initState() {
@@ -54,13 +57,19 @@ class _LoginScreenState extends State<LoginScreen> {
     super.dispose();
   }
 
-  void _login() {
+  // Replace the _login method with:
+  void _login() async {
     if (_formKey.currentState!.validate()) {
-      // Handle login logic
-      print(
-          "Logging in with: ${_emailController.text}, \n"
-              "${_passwordController.text}");
-      Navigator.push(context, MaterialPageRoute(builder: (context)=> MainScreen()));
+      try {
+        await AuthController.instance.loginUser(
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Login failed: ${e.toString()}")),
+        );
+      }
     }
   }
 

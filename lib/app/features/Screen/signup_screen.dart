@@ -3,8 +3,10 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'package:lottie/lottie.dart';
 import '../../core/app_color.dart';
+import '../auth_section/controller/auth_controller.dart';
 import '../icons.dart';
 import 'login_screen.dart';
+import 'package:get/get.dart';
 
 class SignupScreen extends StatefulWidget {
   @override
@@ -24,6 +26,7 @@ class _SignupScreenState extends State<SignupScreen> {
   final FocusNode _emailFocus = FocusNode();
   final FocusNode _passwordFocus = FocusNode();
   bool _obscureText = true;
+  AuthController controller =Get.put(AuthController());
 
   @override
   void dispose() {
@@ -64,19 +67,23 @@ class _SignupScreenState extends State<SignupScreen> {
 
 
 
-  void _createAccount() {
+// Replace the _createAccount method with:
+  void _createAccount() async {
     if (_formKey.currentState!.validate()) {
-      // Handle SignUP logic
-      print(
-          "Create Account Success in with:"
-              " ${_nameController.text}, \n"
-              " ${_birthdayController.text}, \n"
-              " ${_genderController.text}, \n"
-              " ${_emailController.text}, \n"
-              "${_passwordController.text}\n"
-      );
-
-      showSuccessDialog(context);
+      try {
+        await AuthController.instance.registerUser(
+          _nameController.text.trim(),
+          _birthdayController.text.trim(),
+          _genderController.text.trim(),
+          _emailController.text.trim(),
+          _passwordController.text.trim(),
+        );
+        showSuccessDialog(context);
+      } catch (e) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text("Registration failed: ${e.toString()}")),
+        );
+      }
     }
   }
 
