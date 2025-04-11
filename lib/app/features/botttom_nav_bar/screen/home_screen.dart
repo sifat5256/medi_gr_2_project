@@ -316,10 +316,10 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        child: Icon(Icons.add),
-        onPressed: () => Get.to(() => AddEditMedicineScreen()),
-      ),
+      // floatingActionButton: FloatingActionButton(
+      //   child: Icon(Icons.add),
+      //   onPressed: () => Get.to(() => AddEditMedicineScreen()),
+      // ),
     );
   }
 

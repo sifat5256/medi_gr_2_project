@@ -22,13 +22,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'EarningPoint',
+      title: 'Medi Guardian',
       debugShowCheckedModeBanner: false,
       // getPages: [
       //   GetPage(name: '/', page: () => OnBoardingScreen()), // or your initial screen
-      //   GetPage(name: '/login', page: () => LoginScreen()),
-      //   GetPage(name: '/signup', page: () => SignupScreen()),
-      //   GetPage(name: '/profile', page: () => ProfileScreen()),
+      //
       //   // Add other routes as needed
       // ],
       theme: ThemeData(
