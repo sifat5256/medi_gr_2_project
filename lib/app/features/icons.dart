@@ -12,5 +12,6 @@ class OnBoardingIcons{
   static String login = "assets/dollar_icons/logo_splash.png";
   static String signup = "assets/icon/form.png";
   static String black_friday = "assets/icon/black_friday.png";
+  static String mainAppIcon = "assets/image/app_icon.png";
 
 }

@@ -316,10 +316,7 @@ class _HomeScreenState extends State<HomeScreen> {
           ),
         ],
       ),
-      // floatingActionButton: FloatingActionButton(
-      //   child: Icon(Icons.add),
-      //   onPressed: () => Get.to(() => AddEditMedicineScreen()),
-      // ),
+
     );
   }
 
@@ -347,8 +344,13 @@ class _HomeScreenState extends State<HomeScreen> {
 
                     ),
                     child: Padding(
-                      padding: const EdgeInsets.all(8.0),
-                      child: Text("History"),
+                      padding: const EdgeInsets.all(5.0),
+                      child: Row(
+                        children: [
+                          Text("History"),
+                          Icon(Icons.navigate_next)
+                        ],
+                      ),
                     ),
                   ),
                 ),
@@ -467,23 +469,43 @@ class _HomeScreenState extends State<HomeScreen> {
                 ],
               ),
               SizedBox(height: 16),
-              Wrap(
-                spacing: 8,
-                children: medicine.reminderTimes.map((time) {
-                  return Container(
-                    padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Wrap(
+                    spacing: 8,
+                    children: medicine.reminderTimes.map((time) {
+                      return Container(
+                        padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                        decoration: BoxDecoration(
+                          color: Colors.blue.shade50,
+                          borderRadius: BorderRadius.circular(16),
+                        ),
+                        child: Text(
+                          time,
+                          style: TextStyle(color: Colors.blue),
+                        ),
+                      );
+                    }).toList(),
+                  ),
+                  Container(
                     decoration: BoxDecoration(
-                      color: Colors.blue.shade50,
-                      borderRadius: BorderRadius.circular(16),
+                        borderRadius: BorderRadius.circular(15),
+                        color: Colors.grey.shade200
                     ),
-                    child: Text(
-                      time,
-                      style: TextStyle(color: Colors.blue),
+                    child: Padding(
+                      padding: const EdgeInsets.all(8.0),
+                      child: Text(
+                        medicine.notes,
+                        style: TextStyle(color: Colors.grey),
+                      ),
                     ),
-                  );
-                }).toList(),
+                  ),
+                ],
               ),
-              SizedBox(height: 16),
+              SizedBox(height: 6),
+
+
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -535,7 +557,7 @@ class _HomeScreenState extends State<HomeScreen> {
             backgroundColor: Colors.grey[200],
             valueColor: AlwaysStoppedAnimation<Color>(
               progress > 0.25
-                  ? Colors.green
+                  ? Colors.teal
                   : progress > 0.1
                   ? Colors.orange
                   : Colors.red,

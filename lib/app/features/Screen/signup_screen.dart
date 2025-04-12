@@ -104,9 +104,9 @@ class _SignupScreenState extends State<SignupScreen> {
         
                     Center(
                       child: Image(
-                        image: AssetImage(OnBoardingIcons.login),
+                        image: AssetImage(OnBoardingIcons.mainAppIcon),
                         width: double.infinity,
-                        height: 150,
+                        height: 180,
                       ),
                     ),
         
@@ -360,7 +360,7 @@ class _SignupScreenState extends State<SignupScreen> {
                         width: double.infinity,
                         height: 50,
                         decoration: BoxDecoration(
-                            color:AppColor.purpleColor,
+                            color:Colors.teal,
                             borderRadius: BorderRadius.circular(15)),
                         child: Center(
                           child: Text(

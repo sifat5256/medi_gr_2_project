@@ -15,6 +15,8 @@ class HistoryScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
+        backgroundColor: Colors.teal,
+        centerTitle: true,
         title: Text('Medicine History'),
       ),
       body: ListView(

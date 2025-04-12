@@ -81,14 +81,33 @@ class AuthController extends GetxController {
 
   Future<void> loginUser(String email, String password) async {
     try {
-      await auth.signInWithEmailAndPassword(
+      UserCredential userCredential = await auth.signInWithEmailAndPassword(
         email: email.trim(),
         password: password.trim(),
       );
       fetchUserData();
       Get.offAll(MainScreen());
+    } on FirebaseAuthException catch (e) {
+      String errorMessage;
+      switch (e.code) {
+        case 'invalid-email':
+          errorMessage = 'The email address is badly formatted.';
+          break;
+        case 'user-disabled':
+          errorMessage = 'This user has been disabled.';
+          break;
+        case 'user-not-found':
+          errorMessage = 'No user found with this email.';
+          break;
+        case 'wrong-password':
+          errorMessage = 'Incorrect password.';
+          break;
+        default:
+          errorMessage = 'Login failed. Please try again.';
+      }
+      Get.snackbar("Error", errorMessage);
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Error", "An unexpected error occurred");
     }
   }
 

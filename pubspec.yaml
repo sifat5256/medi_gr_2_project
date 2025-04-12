@@ -98,6 +98,7 @@ flutter:
     - assets/animation/
     - assets/dollar_icons/
     - assets/sound/celebration.mp3
+    - assets/image/app_icon.png
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/to/resolution-aware-images
 

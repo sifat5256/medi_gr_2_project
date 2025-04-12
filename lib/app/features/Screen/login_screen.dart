@@ -60,15 +60,20 @@ class _LoginScreenState extends State<LoginScreen> {
   // Replace the _login method with:
   void _login() async {
     if (_formKey.currentState!.validate()) {
+      // Show loading indicator
+      Get.dialog(
+        Center(child: CircularProgressIndicator()),
+        barrierDismissible: false,
+      );
+
       try {
         await AuthController.instance.loginUser(
           _emailController.text.trim(),
           _passwordController.text.trim(),
         );
-      } catch (e) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Login failed: ${e.toString()}")),
-        );
+      } finally {
+        // Hide loading indicator
+        Get.back();
       }
     }
   }
@@ -90,9 +95,9 @@ class _LoginScreenState extends State<LoginScreen> {
                   children: [
                     Center(
                       child: Image(
-                        image: AssetImage(OnBoardingIcons.login),
+                        image: AssetImage(OnBoardingIcons.mainAppIcon),
                         width: double.infinity,
-                        height: 150,
+                        height: 180,
                       ),
                     ),
         
@@ -189,7 +194,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         width: double.infinity,
                         height: 50,
                         decoration: BoxDecoration(
-                            color: AppColor.purpleColor,
+                            color: Colors.teal,
                             borderRadius: BorderRadius.circular(15)),
                         child: Center(
                           child: Text(
