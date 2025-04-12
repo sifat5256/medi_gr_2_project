@@ -9,8 +9,7 @@ import 'app/features/botttom_nav_bar/screen/profile_screen.dart';
 import 'app/features/onboading.dart';
 
 
-void main()async 
-{
+void main()async {
   WidgetsFlutterBinding.ensureInitialized();
   await Firebase.initializeApp();
   runApp(const MyApp());
