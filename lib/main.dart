@@ -15,18 +15,11 @@ void main()async {
 
 class MyApp extends StatelessWidget {
   const MyApp({super.key});
-
-  // This widget is the root of your application.
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
       title: 'Medi Guardian',
       debugShowCheckedModeBanner: false,
-      // getPages: [
-      //   GetPage(name: '/', page: () => OnBoardingScreen()), // or your initial screen
-      //
-      //   // Add other routes as needed
-      // ],
       theme: ThemeData(
         primaryColor: AppColor.purpleColor,
       ),
