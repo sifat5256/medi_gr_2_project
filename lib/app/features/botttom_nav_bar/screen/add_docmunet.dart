@@ -23,43 +23,64 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   String? _selectedDocumentType;
 
   Future<void> _pickFile() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _selectedFile = File(picked.path));
+    try {
+      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        setState(() => _selectedFile = File(picked.path));
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Failed to select file: ${e.toString()}",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     }
   }
 
   Future<void> _pickImage() async {
-    final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
-    if (picked != null) {
-      setState(() => _selectedImage = File(picked.path));
+    try {
+      final picked = await ImagePicker().pickImage(source: ImageSource.gallery);
+      if (picked != null) {
+        setState(() => _selectedImage = File(picked.path));
+      }
+    } catch (e) {
+      Get.snackbar(
+        "Error",
+        "Failed to select image: ${e.toString()}",
+        snackPosition: SnackPosition.BOTTOM,
+        backgroundColor: Colors.redAccent,
+        colorText: Colors.white,
+      );
     }
   }
 
   Future<void> _pickDate(BuildContext context) async {
+    final DateTime now = DateTime.now();
+    final DateTime initialDate = _selectedDate ?? now;
+
     final date = await showDatePicker(
       context: context,
-      initialDate: DateTime.now(),
+      initialDate: initialDate,
       firstDate: DateTime(2000),
-      lastDate: DateTime(2100),
+      lastDate: DateTime(now.year + 5),
       builder: (context, child) {
         return Theme(
           data: Theme.of(context).copyWith(
             colorScheme: ColorScheme.light(
-              primary: Theme.of(context).primaryColor,
+              primary: Colors.teal,
               onPrimary: Colors.white,
+              surface: Colors.white,
               onSurface: Colors.black,
             ),
-            textButtonTheme: TextButtonThemeData(
-              style: TextButton.styleFrom(
-                foregroundColor: Theme.of(context).primaryColor,
-              ),
-            ),
+            dialogBackgroundColor: Colors.white,
           ),
           child: child!,
         );
       },
     );
+
     if (date != null) {
       setState(() => _selectedDate = date);
     }
@@ -67,13 +88,22 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
 
   void _saveDocument() {
     if (!_formKey.currentState!.validate()) return;
-    if (_selectedDate == null || _selectedFile == null || _selectedDocumentType == null) {
+
+    final missingFields = <String>[];
+    if (_selectedDate == null) missingFields.add("date");
+    if (_selectedFile == null) missingFields.add("document file");
+    if (_selectedDocumentType == null) missingFields.add("document type");
+
+    if (missingFields.isNotEmpty) {
       Get.snackbar(
-        "Error",
-        "Please select date, file and document type",
+        "Missing Information",
+        "Please select: ${missingFields.join(', ')}",
         snackPosition: SnackPosition.BOTTOM,
-        backgroundColor: Colors.red,
+        backgroundColor: Colors.redAccent,
         colorText: Colors.white,
+        borderRadius: 10,
+        margin: EdgeInsets.all(10),
+        duration: Duration(seconds: 3),
       );
       return;
     }
@@ -102,143 +132,354 @@ class _AddDocumentScreenState extends State<AddDocumentScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Add Document"),
+        title: Text(
+          "Add Medical Document",
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            fontSize: 18,
+          ),
+        ),
         elevation: 0,
+        centerTitle: true,
+        backgroundColor: Colors.teal,
+        iconTheme: IconThemeData(color: Colors.white),
       ),
       body: SingleChildScrollView(
-        padding: EdgeInsets.all(16),
+        padding: EdgeInsets.all(20),
         child: Form(
           key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              TextFormField(
-                controller: _titleController,
-                decoration: InputDecoration(
-                  labelText: "Document Title",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.title),
-                ),
-                validator: (value) =>
-                value!.isEmpty ? "Please enter title" : null,
-              ),
-              SizedBox(height: 16),
-              TextFormField(
-                controller: _descriptionController,
-                decoration: InputDecoration(
-                  labelText: "Description",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.description),
-                ),
-                maxLines: 3,
-              ),
-              SizedBox(height: 16),
-              DropdownButtonFormField<String>(
-                value: _selectedDocumentType,
-                decoration: InputDecoration(
-                  labelText: "Document Type",
-                  border: OutlineInputBorder(),
-                  prefixIcon: Icon(Icons.category),
-                ),
-                items: controller.documentTypes
-                    .map((type) => DropdownMenuItem(
-                  value: type,
-                  child: Text(type),
-                ))
-                    .toList(),
-                onChanged: (value) =>
-                    setState(() => _selectedDocumentType = value),
-                validator: (value) =>
-                value == null ? "Please select document type" : null,
-              ),
-              SizedBox(height: 16),
-              InkWell(
-                onTap: () => _pickDate(context),
-                child: Container(
-                  padding: EdgeInsets.all(16),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey),
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                  child: Row(
-                    children: [
-                      Icon(
-                        Icons.calendar_today,
-                        color: Theme.of(context).primaryColor,
-                      ),
-                      SizedBox(width: 16),
-                      Text(
-                        _selectedDate == null
-                            ? "Select Date"
-                            : DateFormat('MMM dd, yyyy').format(_selectedDate!),
-                        style: TextStyle(
-                          fontSize: 16,
-                          color:
-                          _selectedDate == null ? Colors.grey : Colors.black,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              SizedBox(height: 16),
-              ElevatedButton(
-                onPressed: _pickFile,
-                child: Text(
-                  _selectedFile == null
-                      ? "Select Document File"
-                      : "File Selected: ${_selectedFile!.path.split('/').last}",
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                ),
-              ),
+              // Document Information Section
+              _buildSectionTitle("Document Information"),
               SizedBox(height: 8),
-              ElevatedButton(
-                onPressed: _pickImage,
-                child: Text(
-                  _selectedImage == null
-                      ? "Select Preview Image (Optional)"
-                      : "Image Selected",
-                ),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.grey[200],
-                  foregroundColor: Colors.black,
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                ),
+
+              // Title Field
+              _buildTextField(
+                controller: _titleController,
+                label: "Document Title *",
+                icon: Icons.title,
+                validator: (value) =>
+                value!.isEmpty ? "Title is required" : null,
               ),
-              if (_selectedImage != null) ...[
-                SizedBox(height: 16),
-                Container(
-                  height: 150,
-                  decoration: BoxDecoration(
-                    borderRadius: BorderRadius.circular(8),
-                    image: DecorationImage(
-                      image: FileImage(_selectedImage!),
-                      fit: BoxFit.cover,
-                    ),
-                  ),
-                ),
-              ],
+              SizedBox(height: 16),
+
+              // Document Type Dropdown
+              _buildDocumentTypeDropdown(),
+              SizedBox(height: 16),
+
+              // Date Picker
+              _buildDatePicker(context),
               SizedBox(height: 24),
-              Obx(() => ElevatedButton(
-                onPressed: controller.isLoading.value ? null : _saveDocument,
-                child: controller.isLoading.value
-                    ? CircularProgressIndicator(color: Colors.white)
-                    : Text("Save Document"),
-                style: ElevatedButton.styleFrom(
-                  padding: EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-              )),
+
+              // Document File Section
+              _buildSectionTitle("Document File *"),
+              SizedBox(height: 8),
+              _buildFilePicker(),
+              SizedBox(height: 16),
+
+              // Preview Image Section
+              _buildSectionTitle("Preview Image (Optional)"),
+              SizedBox(height: 8),
+              _buildImagePicker(),
+              SizedBox(height: 24),
+
+              // Description Section
+              _buildSectionTitle("Description"),
+              SizedBox(height: 8),
+              _buildDescriptionField(),
+              SizedBox(height: 32),
+
+              // Save Button
+              _buildSaveButton(),
             ],
           ),
         ),
       ),
     );
+  }
+
+  Widget _buildSectionTitle(String title) {
+    return Text(
+      title,
+      style: TextStyle(
+        fontSize: 16,
+        fontWeight: FontWeight.w600,
+        color: Colors.teal.shade700,
+      ),
+    );
+  }
+
+  Widget _buildTextField({
+    required TextEditingController controller,
+    required String label,
+    required IconData icon,
+    String? Function(String?)? validator,
+  }) {
+    return TextFormField(
+      controller: controller,
+      decoration: InputDecoration(
+        labelText: label,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: Icon(icon, color: Colors.teal),
+        contentPadding: EdgeInsets.symmetric(vertical: 16, horizontal: 16),
+      ),
+      validator: validator,
+    );
+  }
+
+  Widget _buildDocumentTypeDropdown() {
+    return DropdownButtonFormField<String>(
+      value: _selectedDocumentType,
+      decoration: InputDecoration(
+        labelText: "Document Type *",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        prefixIcon: Icon(Icons.category, color: Colors.teal),
+        contentPadding: EdgeInsets.symmetric(horizontal: 12),
+      ),
+      items: controller.documentTypes
+          .map((type) => DropdownMenuItem(
+        value: type,
+        child: Text(type),
+      ))
+          .toList(),
+      onChanged: (value) => setState(() => _selectedDocumentType = value),
+      validator: (value) => value == null ? "Please select document type" : null,
+      isExpanded: true,
+      icon: Icon(Icons.arrow_drop_down, color: Colors.teal),
+      dropdownColor: Colors.white,
+      borderRadius: BorderRadius.circular(10),
+      style: TextStyle(color: Colors.black87, fontSize: 16),
+    );
+  }
+
+  Widget _buildDatePicker(BuildContext context) {
+    return InkWell(
+      onTap: () => _pickDate(context),
+      borderRadius: BorderRadius.circular(10),
+      child: Container(
+        padding: EdgeInsets.all(16),
+        decoration: BoxDecoration(
+          border: Border.all(color: Colors.grey.shade300),
+          borderRadius: BorderRadius.circular(10),
+          color: Colors.grey.shade50,
+        ),
+        child: Row(
+          children: [
+            Icon(Icons.calendar_today, color: Colors.teal),
+            SizedBox(width: 16),
+            Text(
+              _selectedDate == null
+                  ? "Select Document Date *"
+                  : DateFormat('MMM dd, yyyy').format(_selectedDate!),
+              style: TextStyle(
+                fontSize: 16,
+                color: _selectedDate == null ? Colors.grey : Colors.black87,
+              ),
+            ),
+            Spacer(),
+            if (_selectedDate != null)
+              IconButton(
+                icon: Icon(Icons.close, size: 20),
+                onPressed: () {
+                  setState(() => _selectedDate = null);
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFilePicker() {
+    return Column(
+      children: [
+        OutlinedButton(
+          onPressed: _pickFile,
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            side: BorderSide(color: Colors.teal),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.insert_drive_file, color: Colors.teal),
+              SizedBox(width: 8),
+              Text(
+                _selectedFile == null
+                    ? "Choose Document File"
+                    : "Change File",
+                style: TextStyle(color: Colors.teal),
+              ),
+            ],
+          ),
+        ),
+        if (_selectedFile != null) ...[
+          SizedBox(height: 12),
+          Container(
+            padding: EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: Colors.teal.shade50,
+              borderRadius: BorderRadius.circular(8),
+            ),
+            child: Row(
+              children: [
+                Icon(Icons.file_present, color: Colors.teal),
+                SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    _selectedFile!.path.split('/').last,
+                    style: TextStyle(
+                      fontSize: 14,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, size: 18),
+                  onPressed: () {
+                    setState(() => _selectedFile = null);
+                  },
+                ),
+              ],
+            ),
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildImagePicker() {
+    return Column(
+      children: [
+        OutlinedButton(
+          onPressed: _pickImage,
+          style: OutlinedButton.styleFrom(
+            padding: EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(10),
+            ),
+            side: BorderSide(color: Colors.teal),
+          ),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Icon(Icons.image, color: Colors.teal),
+              SizedBox(width: 8),
+              Text(
+                _selectedImage == null
+                    ? "Choose Preview Image"
+                    : "Change Image",
+                style: TextStyle(color: Colors.teal),
+              ),
+            ],
+          ),
+        ),
+        if (_selectedImage != null) ...[
+          SizedBox(height: 16),
+          Stack(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(12),
+                child: Image.file(
+                  _selectedImage!,
+                  height: 150,
+                  width: double.infinity,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              Positioned(
+                top: 8,
+                right: 8,
+                child: CircleAvatar(
+                  radius: 16,
+                  backgroundColor: Colors.white.withOpacity(0.9),
+                  child: IconButton(
+                    icon: Icon(Icons.close, size: 16),
+                    onPressed: () {
+                      setState(() => _selectedImage = null);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ],
+    );
+  }
+
+  Widget _buildDescriptionField() {
+    return TextFormField(
+      controller: _descriptionController,
+      decoration: InputDecoration(
+        hintText: "Enter document description...",
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(10),
+          borderSide: BorderSide(color: Colors.grey.shade300),
+        ),
+        filled: true,
+        fillColor: Colors.grey.shade50,
+        contentPadding: EdgeInsets.all(16),
+      ),
+      maxLines: 4,
+    );
+  }
+
+  Widget _buildSaveButton() {
+    return Obx(() => ElevatedButton(
+      onPressed: controller.isLoading.value ? null : _saveDocument,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.teal,
+        padding: EdgeInsets.symmetric(vertical: 18),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12),
+        ),
+        elevation: 2,
+      ),
+      child: controller.isLoading.value
+          ? SizedBox(
+        height: 24,
+        width: 24,
+        child: CircularProgressIndicator(
+          strokeWidth: 2,
+          color: Colors.white,
+        ),
+      )
+          : Text(
+        "SAVE DOCUMENT",
+        style: TextStyle(
+          fontSize: 16,
+          fontWeight: FontWeight.w600,
+          letterSpacing: 0.5,
+        ),
+      ),
+    ));
   }
 }

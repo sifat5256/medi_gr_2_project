@@ -12,21 +12,25 @@ class MainScreen extends StatelessWidget {
   final NavController navController = Get.put(NavController());
   final List<Widget> screens = [
     HomeScreen(),
-    ProfileScreen(),
+
     DocumentScreen(),
     AppointmentScreen(),
+    ProfileScreen(),
   ];
 
+  /// Returns a greeting message based on the current time of day.
   String _getGreeting() {
     final hour = DateTime.now().hour;
+
     if (hour < 12) {
-      return 'Good Morning';
+      return '🌅 Good Morning';
     } else if (hour < 17) {
-      return 'Good Afternoon';
+      return '☀️ Good Afternoon';
     } else {
-      return 'Good Evening';
+      return '🌇 Good Evening';
     }
   }
+
 
   @override
   Widget build(BuildContext context) {
@@ -89,6 +93,7 @@ class MainScreen extends StatelessWidget {
         ),
       ),
       floatingActionButton: FloatingActionButton(
+
         onPressed: () => Get.to(() => AddEditMedicineScreen()),
         backgroundColor: Colors.teal,
         child: Icon(Icons.add, size: 28),
@@ -113,9 +118,10 @@ class MainScreen extends StatelessWidget {
             selectedLabelStyle: TextStyle(fontWeight: FontWeight.bold),
             items: const [
               BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
+
               BottomNavigationBarItem(icon: Icon(Icons.folder), label: 'Docs'),
               BottomNavigationBarItem(icon: Icon(Icons.local_hospital), label: 'Doctor'),
+              BottomNavigationBarItem(icon: Icon(Icons.person), label: 'Profile'),
             ],
           ),
         ),
